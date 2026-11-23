@@ -1,0 +1,4 @@
+---
+prowlarr_repository_path: "/opt/Prowlarr"
+prowlarr_version: "3.1.0.5799"
+prowlarr_systemd_template: prowlarr.service.j2

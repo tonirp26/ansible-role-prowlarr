@@ -1,0 +1,16 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: "prowlarr"
+  author: tonirp26
+  description: Prowlarr installation for Linux.
+  company: none.
+  license: ""
+  min_ansible_version: "2.10"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie
+  galaxy_tags:
+    - arrsuite

@@ -1,0 +1,63 @@
+---
+- name: Ensure required Prowlarr dependencies are present.
+  ansible.builtin.apt:
+    name:
+      - sqlite3
+      - libicu-dev
+    state: present
+
+- name: Create Prowlarrsystem user.
+  ansible.builtin.user:
+    name: prowlarr
+    home: /var/lib/prowlarr
+    create_home: true
+    system: true
+
+- name: Ensure Prowlarr data directory exists.
+  ansible.builtin.file:
+    path: /var/lib/prowlarr
+    state: directory
+    owner: prowlarr
+    group: prowlarr
+    mode: "0775"
+
+- name: Ensure Prowlarr installation directory is present.
+  ansible.builtin.file:
+    path: "{{ prowlarr_repository_path }}"
+    state: directory
+    owner: prowlarr
+    group: prowlarr
+    mode: "0755"
+
+- name: Download Prowlarr prebuild release.
+  ansible.builtin.get_url:
+    url: https://github.com/Prowlarr/Prowlarr/releases/download/v{{ prowlarr_version }}/Prowlarr.master.{{ prowlarr_version }}.linux-core-x64.tar.gz
+    dest: /tmp/prowlarr.tar.gz
+    mode: "0644"
+
+- name: Extract Prowlarr prebuild release.
+  ansible.builtin.unarchive:
+    src: /tmp/prowlarr.tar.gz
+    dest: "{{ prowlarr_repository_path }}"
+    owner: prowlarr
+    group: prowlarr
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+
+- name: Copy the systemd Prowlarr configuration template in place.
+  ansible.builtin.template:
+    src: "{{ prowlarr_systemd_template }}"
+    dest: /etc/systemd/system/prowlarr.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart Prowlarr
+
+- name: Ensure Prowlarr is running and enabled on boot.
+  ansible.builtin.systemd_service:
+    name: prowlarr
+    state: started
+    enabled: true
